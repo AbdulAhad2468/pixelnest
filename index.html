@@ -1,1274 +1,673 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="color-scheme" content="dark" />
-  <title>gfsagcy — Graphic Design Agency</title>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PixelNest — Visual Takeover</title>
+  <link rel="icon" type="image/jpeg" href="assets/logo.jpg" />
+  <link rel="apple-touch-icon" href="assets/logo.jpg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet" />
   <style>
-    :root{
-      --bg0:#07080b;
-      --bg1:#0b0d14;
-      --panel:rgba(255,255,255,.06);
-      --panel2:rgba(255,255,255,.09);
-      --stroke:rgba(255,255,255,.12);
-      --text:rgba(255,255,255,.92);
-      --muted:rgba(255,255,255,.62);
-      --muted2:rgba(255,255,255,.48);
-      --brand:#7c5cff;
-      --brand2:#27f7d0;
-      --brand3:#ff4ecd;
-      --ok:#8fff8f;
-      --shadow: 0 30px 70px rgba(0,0,0,.55);
-      --r:18px;
-      --r2:26px;
-      --ease:cubic-bezier(.2,.9,.1,1);
-      --ff: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      --ff2:"Space Grotesk", Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    :root {
+      --bg: #030506;
+      --teal: #38a3a5;
+      --teal-bright: #47c1b9;
+      --white: #f8fafb;
+      --red: #e6392a;
+      --purple: #7c3aed;
     }
-
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    html{scroll-behavior:smooth}
-    body{
-      margin:0;
-      font-family:var(--ff);
-      background: radial-gradient(1200px 900px at 20% 10%, rgba(124,92,255,.22), transparent 65%),
-                  radial-gradient(900px 700px at 80% 20%, rgba(39,247,208,.14), transparent 70%),
-                  radial-gradient(900px 600px at 55% 80%, rgba(255,78,205,.10), transparent 75%),
-                  linear-gradient(180deg, var(--bg0), var(--bg1));
-      color:var(--text);
-      overflow-x:hidden;
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--white);
+      font-family: "Inter", system-ui, sans-serif;
+      overflow-x: hidden;
     }
-
-    a{color:inherit;text-decoration:none}
-    button{font:inherit}
-    .container{width:min(1120px, calc(100% - 40px)); margin:0 auto}
-
-    /* Canvas layer (Three.js) */
-    #stage{
-      position:fixed;
-      inset:0;
-      z-index:0;
-      pointer-events:none;
+    #canvas-wrap {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
     }
-    #stage canvas{display:block; width:100%; height:100%;}
-
-    /* Overlay gradients for readability */
-    .vignette{
-      position:fixed;
-      inset:0;
-      z-index:1;
-      pointer-events:none;
-      background:
-        radial-gradient(1100px 700px at 50% 10%, rgba(0,0,0,.10), rgba(0,0,0,.55) 70%),
-        linear-gradient(180deg, rgba(0,0,0,.55), rgba(0,0,0,.15) 30%, rgba(0,0,0,.55));
-      mix-blend-mode: multiply;
-    }
-
-    /* Top nav */
-    .nav{
-      position:fixed;
-      top:14px;
-      left:0;
-      right:0;
-      z-index:20;
-    }
-    .nav-inner{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      padding:12px 14px;
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(12,14,22,.54);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border-radius: 999px;
-      box-shadow: 0 20px 50px rgba(0,0,0,.35);
-    }
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      padding-left:6px;
-      min-width: 180px;
-    }
-    .brand-mark{
-      width:34px;height:34px; display:grid; place-items:center;
-      border-radius: 12px;
-      background: linear-gradient(135deg, rgba(124,92,255,.22), rgba(39,247,208,.10));
-      border:1px solid rgba(255,255,255,.12);
-    }
-    .brand-name{
-      font-family: var(--ff2);
-      letter-spacing: .02em;
-      font-weight: 600;
-      font-size: 14px;
-      line-height: 1.1;
-    }
-    .brand-sub{
-      font-size: 11px;
-      color: var(--muted2);
-      margin-top: 2px;
-    }
-    .nav-links{
-      display:flex; gap:18px; align-items:center;
-      padding:0 10px;
-    }
-    .nav-links a{
-      font-size: 12px;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      color: var(--muted);
-      padding: 8px 10px;
-      border-radius: 999px;
-      transition: background .2s var(--ease), color .2s var(--ease);
-    }
-    .nav-links a:hover{ background: rgba(255,255,255,.06); color: var(--text); }
-    .nav-cta{
-      display:flex; gap:10px; align-items:center;
-      padding-right:6px;
-    }
-    .btn{
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.06);
-      color: var(--text);
-      padding: 10px 14px;
-      border-radius: 999px;
-      font-size: 12px;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      cursor:pointer;
-      transition: transform .18s var(--ease), background .18s var(--ease), border-color .18s var(--ease);
-    }
-    .btn:hover{ transform: translateY(-1px); background: rgba(255,255,255,.09); border-color: rgba(255,255,255,.22); }
-    .btn-primary{
-      border-color: rgba(124,92,255,.35);
-      background: linear-gradient(135deg, rgba(124,92,255,.95), rgba(255,78,205,.45));
-      box-shadow: 0 18px 40px rgba(124,92,255,.25);
-    }
-    .btn-primary:hover{ background: linear-gradient(135deg, rgba(124,92,255,1), rgba(255,78,205,.55)); }
-
-    .hamburger{
-      display:none;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.06);
-      width:40px; height:40px;
-      border-radius: 999px;
-      cursor:pointer;
-    }
-    .hamburger span{display:block; width:18px; height:2px; background: rgba(255,255,255,.82); margin: 5px auto; border-radius: 2px;}
-
-    @media (max-width: 860px){
-      .nav-links{display:none}
-      .brand{min-width:auto}
-      .nav-cta .btn{display:none}
-      .nav-cta .btn-primary{display:inline-flex}
-      .hamburger{display:inline-grid; place-items:center}
-    }
-
-    /* Content on top of canvas */
-    main{
-      position:relative;
-      z-index:10;
-    }
-
-    .section{
+    #canvas-wrap canvas { display: block; width: 100%; height: 100%; }
+    .ui {
+      position: relative;
+      z-index: 1;
       min-height: 100vh;
-      display:flex;
-      align-items:center;
-      padding: 110px 0;
+      pointer-events: none;
     }
-    .grid-2{
-      display:grid;
-      grid-template-columns: 1.25fr .75fr;
-      gap: 34px;
-      align-items:center;
+    .ui a, .ui button { pointer-events: auto; }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 1.5rem clamp(1rem, 4vw, 3rem);
+      gap: 1rem;
     }
-    @media (max-width: 980px){
-      .grid-2{ grid-template-columns: 1fr; gap: 22px; }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      font-size: 1.15rem;
     }
-
-    .hero-kicker{
-      display:inline-flex;
-      gap:10px;
-      align-items:center;
-      padding: 10px 12px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.05);
-      border-radius: 999px;
-      box-shadow: 0 18px 44px rgba(0,0,0,.25);
+    .brand {
+      display: inline-flex;
+      gap: 0;
+      line-height: 1;
     }
-    .dot{
-      width:10px;height:10px;border-radius:99px;
-      background: linear-gradient(135deg, var(--brand2), var(--brand));
-      box-shadow: 0 0 0 4px rgba(39,247,208,.10);
+    .logo img {
+      width: 36px;
+      height: 36px;
+      border-radius: 9px;
+      object-fit: cover;
+      box-shadow: 0 0 22px rgba(71, 193, 185, 0.22);
+      border: 1px solid rgba(71, 193, 185, 0.25);
     }
-    .hero-kicker span{
-      font-size: 12px;
-      letter-spacing: .08em;
+    .logo .pixel { color: var(--white); }
+    .logo .nest {
+      color: var(--teal-bright);
+      text-shadow: 0 0 40px rgba(71, 193, 185, 0.35);
+    }
+    .logo-p {
+      width: 36px;
+      height: 36px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: repeat(4, 1fr);
+      gap: 2px;
+    }
+    .logo-p span {
+      border-radius: 2px;
+      background: var(--teal-bright);
+      opacity: 0.35;
+      animation: pixelPulse 3s ease-in-out infinite;
+    }
+    .logo-p span.on { opacity: 1; background: var(--teal); }
+    .tagline {
+      max-width: 280px;
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
-      color: var(--muted);
+      line-height: 1.5;
+      color: rgba(248, 250, 251, 0.85);
+      text-align: right;
     }
-    .h1{
-      font-family: var(--ff2);
-      font-size: clamp(42px, 6.1vw, 74px);
-      line-height: 1.02;
-      margin: 18px 0 14px;
-      letter-spacing: -.02em;
+    main {
+      padding: 0 clamp(1rem, 4vw, 3rem) 4rem;
+      display: grid;
+      gap: 3rem;
     }
-    .h1 .grad{
-      background: linear-gradient(90deg, rgba(124,92,255,1), rgba(39,247,208,1) 55%, rgba(255,78,205,1));
+    .hero {
+      text-align: center;
+      padding-top: 2vh;
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 6vw, 4rem);
+      font-weight: 900;
+      line-height: 1.05;
+      text-transform: uppercase;
+      letter-spacing: -0.03em;
+    }
+    .hero h1 .teal {
+      color: var(--teal-bright);
+      text-shadow: 0 0 40px rgba(71, 193, 185, 0.35);
+    }
+    .hero h1 .white { color: var(--white); }
+    .hero .sub {
+      margin-top: 1rem;
+      font-size: clamp(0.75rem, 2vw, 0.9rem);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(248, 250, 251, 0.75);
+    }
+    .hero .agency {
+      margin: 0.95rem auto 0;
+      max-width: 64ch;
+      font-size: clamp(0.95rem, 2.3vw, 1.05rem);
+      line-height: 1.6;
+      color: rgba(248, 250, 251, 0.8);
+      letter-spacing: 0.01em;
+      text-transform: none;
+    }
+    .chips {
+      margin-top: 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.6rem;
+      pointer-events: auto;
+    }
+    .chip {
+      padding: 0.5rem 0.85rem;
+      border-radius: 999px;
+      border: 1px solid rgba(71, 193, 185, 0.35);
+      background: rgba(10, 14, 16, 0.6);
+      color: rgba(248, 250, 251, 0.9);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      backdrop-filter: blur(10px);
+    }
+    .chip.teal { border-color: rgba(71, 193, 185, 0.55); box-shadow: 0 0 22px rgba(71, 193, 185, 0.15); }
+    .chip.purple { border-color: rgba(124, 58, 237, 0.45); box-shadow: 0 0 22px rgba(124, 58, 237, 0.12); }
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.25rem;
+      pointer-events: auto;
+    }
+    .card {
+      position: relative;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid rgba(71, 193, 185, 0.25);
+      background: linear-gradient(145deg, rgba(15, 20, 22, 0.9), rgba(5, 8, 10, 0.95));
+      box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.5),
+        0 24px 48px rgba(0, 0, 0, 0.45),
+        0 0 60px rgba(56, 163, 165, 0.08);
+      transform-style: preserve-3d;
+      transition: transform 0.35s ease, box-shadow 0.35s ease;
+    }
+    .card:hover {
+      transform: translateY(-6px) rotateX(2deg) rotateY(-2deg);
+      box-shadow:
+        0 0 0 1px rgba(71, 193, 185, 0.35),
+        0 32px 64px rgba(0, 0, 0, 0.5),
+        0 0 80px rgba(124, 58, 237, 0.12);
+    }
+    .card img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .card-caption {
+      padding: 0.85rem 1rem;
+      font-size: 0.7rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(248, 250, 251, 0.65);
+      border-top: 1px solid rgba(71, 193, 185, 0.15);
+    }
+    .dm-section {
+      text-align: center;
+      padding: 2rem 0 1rem;
+    }
+    .dm-big {
+      font-size: clamp(4rem, 18vw, 10rem);
+      font-weight: 900;
+      line-height: 0.85;
+      background: linear-gradient(180deg, var(--teal-bright) 0%, transparent 85%);
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
+      filter: drop-shadow(0 0 30px rgba(71, 193, 185, 0.25));
     }
-    .lead{
-      font-size: 16px;
-      line-height: 1.7;
-      color: var(--muted);
-      max-width: 58ch;
-      margin:0;
+    .dm-rest {
+      font-size: clamp(0.7rem, 2vw, 0.85rem);
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      margin-top: 0.5rem;
+      color: rgba(248, 250, 251, 0.8);
     }
-    .hero-actions{
-      display:flex;
-      gap:12px;
-      align-items:center;
-      margin-top: 22px;
-      flex-wrap:wrap;
+    .section-title {
+      text-align: center;
+      font-size: clamp(1.25rem, 3.2vw, 1.9rem);
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      text-transform: uppercase;
+      margin: 0 auto 0.75rem;
+      max-width: 18ch;
     }
-    .hero-meta{
-      display:flex;
-      gap:18px;
-      margin-top: 24px;
-      flex-wrap:wrap;
-      color: var(--muted2);
-      font-size: 12px;
-    }
-    .pill{
-      display:inline-flex;
-      gap:8px;
-      align-items:center;
-      padding:10px 12px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.04);
-    }
-    .pill b{ color: var(--text); font-weight: 600; }
-
-    .card{
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.05);
-      border-radius: var(--r2);
-      padding: 18px;
-      box-shadow: var(--shadow);
-    }
-    .card h3{
-      font-family: var(--ff2);
-      font-size: 16px;
-      margin: 0 0 10px;
-      letter-spacing: .01em;
-    }
-    .card p{
-      margin:0;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.65;
-    }
-    .stack{display:grid; gap:12px}
-
-    /* Sections */
-    .section-title{
-      font-family: var(--ff2);
-      font-size: clamp(28px, 3.2vw, 44px);
-      margin:0 0 10px;
-      letter-spacing: -.01em;
-    }
-    .section-desc{
-      margin:0;
-      color: var(--muted);
+    .section-lead {
+      text-align: center;
+      margin: 0 auto 1.5rem;
       max-width: 70ch;
+      color: rgba(248, 250, 251, 0.75);
       line-height: 1.7;
     }
-
-    .kicker{
-      display:inline-flex;
-      gap:10px;
-      align-items:center;
-      padding: 9px 11px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.04);
-      color: var(--muted);
-      font-size: 12px;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-    }
-
-    .services{
-      display:grid;
-      grid-template-columns: repeat(12, 1fr);
-      gap: 14px;
-      margin-top: 22px;
-    }
-    .service{
-      grid-column: span 4;
-      padding: 16px 16px 15px;
-      border-radius: var(--r2);
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.04);
-      transition: transform .2s var(--ease), background .2s var(--ease), border-color .2s var(--ease);
-    }
-    .service:hover{
-      transform: translateY(-3px);
-      background: rgba(255,255,255,.07);
-      border-color: rgba(255,255,255,.18);
-    }
-    .service h4{
-      font-family: var(--ff2);
-      margin: 0 0 10px;
-      font-size: 15px;
-    }
-    .service p{
-      margin:0;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.6;
-    }
-    .service .tag{
-      display:inline-block;
-      margin-top: 10px;
-      font-size: 11px;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,.72);
-      opacity:.85;
-    }
-
-    @media (max-width: 980px){
-      .service{ grid-column: span 6; }
-    }
-    @media (max-width: 560px){
-      .service{ grid-column: span 12; }
-    }
-
-    .work-grid{
-      display:grid;
-      grid-template-columns: repeat(12, 1fr);
-      gap: 14px;
-      margin-top: 22px;
-    }
-    .tile{
-      grid-column: span 4;
-      border-radius: var(--r2);
-      overflow:hidden;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.04);
-      box-shadow: var(--shadow);
-      position:relative;
-      min-height: 210px;
-    }
-    .tile::before{
-      content:"";
-      position:absolute;
-      inset:-1px;
-      background:
-        radial-gradient(560px 300px at 30% 20%, rgba(124,92,255,.55), transparent 60%),
-        radial-gradient(560px 300px at 75% 65%, rgba(39,247,208,.35), transparent 65%),
-        radial-gradient(560px 300px at 55% 85%, rgba(255,78,205,.30), transparent 60%),
-        linear-gradient(180deg, rgba(255,255,255,.06), rgba(0,0,0,.22));
-      filter: saturate(1.1) contrast(1.05);
-      transform: scale(1.05);
-    }
-    .tile:nth-child(2)::before{ filter: hue-rotate(25deg) saturate(1.2); }
-    .tile:nth-child(3)::before{ filter: hue-rotate(-30deg) saturate(1.15); }
-    .tile:nth-child(4)::before{ filter: hue-rotate(70deg) saturate(1.2); }
-    .tile:nth-child(5)::before{ filter: hue-rotate(-75deg) saturate(1.2); }
-    .tile:nth-child(6)::before{ filter: hue-rotate(120deg) saturate(1.15); }
-    .tile .tile-body{
-      position:absolute;
-      inset:0;
-      padding: 16px;
-      display:flex;
-      flex-direction:column;
-      justify-content:flex-end;
-      gap: 8px;
-      background: linear-gradient(180deg, transparent 40%, rgba(0,0,0,.66));
-    }
-    .tile .tile-title{
-      font-family: var(--ff2);
-      font-size: 16px;
-      margin:0;
-      letter-spacing: .01em;
-    }
-    .tile .tile-meta{
-      margin:0;
-      color: rgba(255,255,255,.70);
-      font-size: 12px;
-      line-height: 1.5;
-      display:flex;
-      gap: 12px;
-      flex-wrap:wrap;
-    }
-    .tile .chip{
-      display:inline-flex;
-      padding: 7px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.06);
-      font-size: 11px;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,.80);
-    }
-    @media (max-width: 980px){
-      .tile{ grid-column: span 6; }
-    }
-    @media (max-width: 560px){
-      .tile{ grid-column: span 12; }
-    }
-
-    .process{
-      display:grid;
-      grid-template-columns: repeat(12, 1fr);
-      gap: 14px;
-      margin-top: 22px;
-    }
-    .step{
-      grid-column: span 3;
-      border-radius: var(--r2);
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.04);
-      padding: 16px;
-    }
-    .step .n{
-      width: 34px; height: 34px;
-      border-radius: 12px;
-      display:grid; place-items:center;
-      border: 1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.06);
-      color: rgba(255,255,255,.86);
-      font-family: var(--ff2);
-      font-weight: 600;
-      margin-bottom: 10px;
-    }
-    .step h4{
-      font-family: var(--ff2);
-      margin:0 0 10px;
-      font-size: 14px;
-    }
-    .step p{ margin:0; color: var(--muted); font-size: 12.5px; line-height: 1.6;}
-    @media (max-width: 980px){
-      .step{ grid-column: span 6; }
-    }
-    @media (max-width: 560px){
-      .step{ grid-column: span 12; }
-    }
-
-    .quote{
-      border-radius: var(--r2);
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.04);
-      padding: 18px;
-      margin-top: 22px;
-      display:grid;
-      gap: 10px;
-    }
-    .quote p{ margin:0; color: rgba(255,255,255,.82); line-height: 1.7; }
-    .quote small{ color: var(--muted2); }
-
-    .footer{
-      padding: 80px 0 46px;
-      border-top: 1px solid rgba(255,255,255,.10);
-      background: linear-gradient(180deg, rgba(0,0,0,.0), rgba(0,0,0,.35));
-    }
-    .footer-grid{
-      display:grid;
-      grid-template-columns: 1.3fr 1fr 1fr;
-      gap: 18px;
-      align-items:start;
-    }
-    @media (max-width: 980px){
-      .footer-grid{ grid-template-columns: 1fr; }
-    }
-    .footer h4{
-      font-family: var(--ff2);
-      margin:0 0 10px;
-      font-size: 13px;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,.80);
-    }
-    .footer a{ color: var(--muted); }
-    .footer a:hover{ color: var(--text); }
-    .footer p{ color: var(--muted); margin:0; line-height: 1.7; }
-    .fineprint{
-      margin-top: 28px;
-      color: rgba(255,255,255,.45);
-      font-size: 12px;
-      display:flex;
-      gap: 10px;
-      flex-wrap:wrap;
-      justify-content:space-between;
-      border-top: 1px solid rgba(255,255,255,.10);
-      padding-top: 16px;
-    }
-
-    /* Scroll hint */
-    .scroll-hint{
-      position:absolute;
-      left:0; right:0; bottom: 30px;
-      display:flex;
-      justify-content:center;
-      z-index: 12;
-      pointer-events:none;
-    }
-    .scroll-hint .hint{
-      display:inline-flex;
-      align-items:center;
-      gap:10px;
-      padding: 9px 12px;
-      border-radius: 999px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.25);
-      color: rgba(255,255,255,.72);
-      font-size: 12px;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-    }
-    .scroll-hint .bar{
-      width: 60px; height: 2px;
-      background: linear-gradient(90deg, rgba(124,92,255,1), rgba(39,247,208,1), rgba(255,78,205,1));
-      border-radius: 99px;
-      opacity: .85;
-      animation: pulse 1.6s ease-in-out infinite;
-    }
-    @keyframes pulse{
-      0%,100%{ transform: scaleX(.75); opacity:.55; }
-      50%{ transform: scaleX(1); opacity:1; }
-    }
-
-    /* Reduced motion */
-    @media (prefers-reduced-motion: reduce){
-      html{scroll-behavior:auto}
-      .scroll-hint .bar{animation:none}
-      .btn, .service{transition:none}
-    }
-
-    /* Three.js load error overlay */
-    #threeError{
-      position:fixed;
-      left:14px;
-      right:14px;
-      bottom:14px;
-      z-index: 50;
-      display:none;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(12,14,22,.72);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
+    .services {
+      pointer-events: auto;
       border-radius: 16px;
-      padding: 12px 12px;
-      box-shadow: 0 20px 50px rgba(0,0,0,.45);
-      color: rgba(255,255,255,.9);
-      max-width: 980px;
-      margin: 0 auto;
+      border: 1px solid rgba(71, 193, 185, 0.18);
+      background: linear-gradient(145deg, rgba(15, 20, 22, 0.72), rgba(5, 8, 10, 0.86));
+      box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.45),
+        0 24px 56px rgba(0, 0, 0, 0.45),
+        0 0 80px rgba(71, 193, 185, 0.08);
+      padding: 1.25rem;
     }
-    #threeError b{ font-family: var(--ff2); letter-spacing: .01em; }
-    #threeError code{
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      font-size: 12px;
-      color: rgba(255,255,255,.82);
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.9rem;
     }
-    #threeError .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between; }
-    #threeError .msg{ color: rgba(255,255,255,.72); font-size: 12.5px; line-height: 1.5; margin-top: 6px; }
-    #threeError .mini{ font-size: 12px; color: rgba(255,255,255,.62); }
-    #threeError .btn{ padding: 9px 12px; }
+    .svc {
+      border-radius: 14px;
+      border: 1px solid rgba(71, 193, 185, 0.16);
+      background: rgba(7, 10, 12, 0.55);
+      padding: 1rem 1rem 0.95rem;
+      transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+      transform-style: preserve-3d;
+    }
+    .svc:hover {
+      transform: translateY(-4px) rotateX(1.2deg) rotateY(-1.2deg);
+      border-color: rgba(71, 193, 185, 0.35);
+      box-shadow: 0 0 34px rgba(71, 193, 185, 0.12);
+    }
+    .svc h3 {
+      font-size: 0.95rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .svc p {
+      margin-top: 0.55rem;
+      color: rgba(248, 250, 251, 0.74);
+      line-height: 1.65;
+      font-size: 0.92rem;
+    }
+    .specialities {
+      margin-top: 1rem;
+      display: grid;
+      gap: 0.65rem;
+      color: rgba(248, 250, 251, 0.75);
+      line-height: 1.7;
+    }
+    .specialities strong { color: rgba(248, 250, 251, 0.92); }
+    footer {
+      margin-top: auto;
+      padding: 2rem clamp(1rem, 4vw, 3rem) 2.5rem;
+      border-top: 1px solid rgba(71, 193, 185, 0.15);
+      pointer-events: auto;
+    }
+    .footer-stack { display: grid; gap: 1rem; }
+    .social {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      justify-content: center;
+      align-items: center;
+    }
+    .social a {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.65rem 1.1rem;
+      border-radius: 999px;
+      text-decoration: none;
+      color: var(--white);
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      border: 1px solid rgba(71, 193, 185, 0.4);
+      background: rgba(10, 14, 16, 0.75);
+      backdrop-filter: blur(10px);
+      transition: background 0.2s, border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+    }
+    .social a:hover {
+      border-color: var(--teal-bright);
+      background: rgba(56, 163, 165, 0.15);
+      transform: translateY(-2px);
+      box-shadow: 0 0 24px rgba(71, 193, 185, 0.25);
+    }
+    .social svg { width: 18px; height: 18px; fill: currentColor; }
+    @keyframes pixelPulse {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 1; }
+    }
   </style>
 </head>
 <body>
-  <div id="stage" aria-hidden="true"></div>
-  <div class="vignette" aria-hidden="true"></div>
-  <div id="threeError" role="status" aria-live="polite"></div>
-
-  <header class="nav">
-    <div class="container">
-      <div class="nav-inner">
-        <a class="brand" href="#top" aria-label="gfsagcy home">
-          <span class="brand-mark" aria-hidden="true">
-            <!-- Test logo: inline SVG (self-contained) -->
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="gfsagcy mark">
-              <path d="M12 2.2c3.5 0 6.6 1.9 8.2 4.8.3.6.1 1.3-.5 1.6l-3.1 1.7c-.6.3-1.3.1-1.6-.5-.9-1.7-2.8-2.9-5-2.9-3.1 0-5.6 2.5-5.6 5.6S6.9 18 10 18c1.8 0 3.3-.7 4.4-1.9H12c-.7 0-1.3-.6-1.3-1.3v-3.2c0-.7.6-1.3 1.3-1.3h8.3c.7 0 1.3.6 1.3 1.3v.6c0 6-4.8 10.7-10.7 10.7S1.3 18.1 1.3 12 6 2.2 12 2.2Z" fill="url(#g)"/>
-              <path d="M19.8 10.2h-6.1c-.7 0-1.3.6-1.3 1.3v.7c0 .7.6 1.3 1.3 1.3h4.2c.8 0 1.4-.8 1.2-1.6-.2-1-.7-1.8-1.3-2.5Z" fill="rgba(255,255,255,.22)"/>
-              <defs>
-                <linearGradient id="g" x1="3" y1="5" x2="21" y2="19" gradientUnits="userSpaceOnUse">
-                  <stop stop-color="#27F7D0"/>
-                  <stop offset=".52" stop-color="#7C5CFF"/>
-                  <stop offset="1" stop-color="#FF4ECD"/>
-                </linearGradient>
-              </defs>
-            </svg>
-          </span>
-          <span>
-            <div class="brand-name">gfsagcy</div>
-            <div class="brand-sub">graphic design agency</div>
-          </span>
-        </a>
-
-        <nav class="nav-links" aria-label="primary">
-          <a href="#services">Services</a>
-          <a href="#work">Work</a>
-          <a href="#process">Process</a>
-          <a href="#contact">Contact</a>
+  <div id="canvas-wrap" aria-hidden="true"></div>
+  <div class="ui">
+    <header>
+      <div class="logo">
+        <img src="assets/logo.jpg" alt="PixelNest logo" width="36" height="36" loading="eager" />
+        <span class="brand"><span class="pixel">Pixel</span><span class="nest">Nest</span></span>
+      </div>
+      <p class="tagline">We don't design. We dominate attention.</p>
+    </header>
+    <main>
+      <section class="hero">
+        <h1>
+          <span class="teal">2026 doesn't</span><br />
+          <span class="white">care about clean.</span>
+        </h1>
+        <p class="sub">Identity beats templates. Be the choice—not the option.</p>
+        <p class="agency">PixelNest is a professional agency for <strong>Web Development</strong> and <strong>Graphic Design</strong>—built to make your brand look premium, modern, and unforgettable.</p>
+        <div class="chips" aria-label="Services">
+          <span class="chip teal">Web Development</span>
+          <span class="chip purple">Graphic Design</span>
+        </div>
+      </section>
+      <section class="gallery" aria-label="Campaign visuals">
+        <article class="card">
+          <img src="assets/pixelnest-1.png" alt="PixelNest — floating laptop and rocks campaign" width="800" height="1000" loading="lazy" />
+          <p class="card-caption">You aren't minimalist — you're unforgettable</p>
+        </article>
+        <article class="card">
+          <img src="assets/pixelnest-2.png" alt="PixelNest — DM for visual takeover" width="800" height="1200" loading="lazy" />
+          <p class="card-caption">DM us for a visual takeover</p>
+        </article>
+        <article class="card">
+          <img src="assets/pixelnest-3.png" alt="PixelNest — brand identity campaign" width="800" height="900" loading="lazy" />
+          <p class="card-caption">Spend on identity—not sameness</p>
+        </article>
+        <article class="card">
+          <img src="assets/pixelnest-4.png" alt="PixelNest — future of marketing laptop scene" width="800" height="900" loading="lazy" />
+          <p class="card-caption">Future of marketing — neon depth</p>
+        </article>
+      </section>
+      <section class="services" aria-label="Specialities and services">
+        <h2 class="section-title"><span class="teal">Our</span> specialities</h2>
+        <p class="section-lead">We combine clean engineering with bold visuals—so your website loads fast, looks premium, and converts visitors into customers.</p>
+        <div class="services-grid" aria-label="Service list">
+          <article class="svc">
+            <h3>Web Development</h3>
+            <p>Modern, responsive websites with smooth animations, SEO basics, and clean code you can scale.</p>
+          </article>
+          <article class="svc">
+            <h3>Graphic Design</h3>
+            <p>Brand identity, social posts, and marketing creatives that look consistent and instantly recognizable.</p>
+          </article>
+          <article class="svc">
+            <h3>UI/UX Design</h3>
+            <p>Layouts that feel premium—better structure, better readability, and better user flow.</p>
+          </article>
+          <article class="svc">
+            <h3>Performance & SEO</h3>
+            <p>Speed-focused builds, image optimization, and on-page SEO essentials for stronger visibility.</p>
+          </article>
+        </div>
+        <div class="specialities" aria-label="What makes us different">
+          <div><strong>Signature look:</strong> dark-tech + teal glow (like your posters), applied as a real brand system.</div>
+          <div><strong>Conversion-first:</strong> clear messaging, strong hierarchy, and CTAs that guide users.</div>
+          <div><strong>Detail obsession:</strong> spacing, typography, and micro-interactions that feel expensive.</div>
+        </div>
+      </section>
+      <section class="dm-section">
+        <div class="dm-big">DM</div>
+        <p class="dm-rest">Us for a visual takeover</p>
+      </section>
+    </main>
+    <footer>
+      <div class="footer-stack">
+        <nav class="social" aria-label="Services and contact">
+          <a href="mailto:pixelnestagcy@gmail.com">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6.5A2.5 2.5 0 0 0 17.5 4h-11A2.5 2.5 0 0 0 4 6.5v11A2.5 2.5 0 0 0 6.5 20h11A2.5 2.5 0 0 0 20 17.5v-11Zm-1.7.27-5.56 4.27a1.2 1.2 0 0 1-1.48 0L5.7 6.77A.8.8 0 0 1 6.67 5.5l5.3 4.07.03.02 5.3-4.09a.8.8 0 1 1 .98 1.27ZM5.6 17.5v-9l4.7 3.62a2.8 2.8 0 0 0 3.4 0l4.7-3.62v9a.9.9 0 0 1-.9.9h-11a.9.9 0 0 1-.9-.9Z"/></svg>
+            pixelnestagcy@gmail.com
+          </a>
         </nav>
-
-        <div class="nav-cta">
-          <button class="btn" type="button" id="btnScrollDemo">3D scroll demo</button>
-          <button class="btn btn-primary" type="button" id="btnStart">Start a project</button>
-          <button class="hamburger" type="button" id="btnMenu" aria-label="menu">
-            <span></span><span></span><span></span>
-          </button>
-        </div>
-      </div>
-    </div>
-  </header>
-
-  <main id="top">
-    <section class="section" id="hero">
-      <div class="container">
-        <div class="grid-2">
-          <div>
-            <div class="hero-kicker"><span class="dot" aria-hidden="true"></span><span>Branding • 3D • Motion • Web</span></div>
-            <h1 class="h1">Design that <span class="grad">moves</span> people.</h1>
-            <p class="lead">
-              gfsagcy is a full-service graphic design agency crafting brand systems, product visuals,
-              and scroll-driven web experiences. Scroll to drive the 3D scene behind this page.
-            </p>
-            <div class="hero-actions">
-              <a class="btn btn-primary" href="#contact">Get a quote</a>
-              <a class="btn" href="#work">See work</a>
-              <a class="btn" href="#services">What we do</a>
-            </div>
-            <div class="hero-meta">
-              <span class="pill"><b>48–72h</b> first concepts</span>
-              <span class="pill"><b>Pixel-perfect</b> delivery</span>
-              <span class="pill"><b>3D-ready</b> visuals</span>
-            </div>
-          </div>
-
-          <div class="stack">
-            <div class="card">
-              <h3>Scroll = animation</h3>
-              <p>
-                Your scroll position controls the camera, lighting, and logo-orbit shapes in the 3D scene.
-                It’s smooth, responsive, and works in one HTML file.
-              </p>
-            </div>
-            <div class="card">
-              <h3>Agency-grade sections</h3>
-              <p>
-                Services, selected work, process, testimonials, and a contact CTA — laid out like a real agency site.
-              </p>
-            </div>
-            <div class="card">
-              <h3>Performance-minded</h3>
-              <p>
-                No heavy textures. Uses a simple particle field + emissive meshes and caps pixel ratio for stable FPS.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="scroll-hint" aria-hidden="true">
-        <div class="hint"><span class="bar"></span> scroll to move 3D</div>
-      </div>
-    </section>
-
-    <section class="section" id="services">
-      <div class="container">
-        <div class="kicker">Full agency services</div>
-        <h2 class="section-title">Everything your brand needs to look expensive.</h2>
-        <p class="section-desc">
-          Strategy-first, design-led. We build brand identities, social kits, packaging, and web experiences that feel premium and modern.
-        </p>
-
-        <div class="services" role="list">
-          <div class="service" role="listitem">
-            <h4>Brand identity</h4>
-            <p>Logo systems, typography, color rules, and usage guidelines that scale.</p>
-            <span class="tag">logos • guidelines • art direction</span>
-          </div>
-          <div class="service" role="listitem">
-            <h4>Social & content</h4>
-            <p>High-impact post templates, motion reels, ad creatives, thumbnails.</p>
-            <span class="tag">instagram • ads • motion</span>
-          </div>
-          <div class="service" role="listitem">
-            <h4>3D & product</h4>
-            <p>Stylized 3D scenes, product visualization, key visuals for campaigns.</p>
-            <span class="tag">3D • mockups • renders</span>
-          </div>
-          <div class="service" role="listitem">
-            <h4>Web design</h4>
-            <p>Premium layouts with modern UX, micro-interactions, conversions in mind.</p>
-            <span class="tag">landing pages • ui • ux</span>
-          </div>
-          <div class="service" role="listitem">
-            <h4>Print & packaging</h4>
-            <p>Boxes, labels, merch, menus, brochures — prepared for press properly.</p>
-            <span class="tag">cmyk • dielines • production</span>
-          </div>
-          <div class="service" role="listitem">
-            <h4>Motion systems</h4>
-            <p>Animated brand components for reels, websites, and product UI.</p>
-            <span class="tag">kinetic type • transitions</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="section" id="work">
-      <div class="container">
-        <div class="kicker">Selected work</div>
-        <h2 class="section-title">A few visuals we’d proudly ship again.</h2>
-        <p class="section-desc">
-          These tiles are “mock campaigns” for demo purposes, but the layout matches a real agency portfolio page.
-        </p>
-
-        <div class="work-grid" aria-label="work grid">
-          <article class="tile">
-            <div class="tile-body">
-              <h3 class="tile-title">Neon Atelier</h3>
-              <p class="tile-meta"><span class="chip">branding</span><span class="chip">3D key visual</span><span class="chip">social kit</span></p>
-            </div>
-          </article>
-          <article class="tile">
-            <div class="tile-body">
-              <h3 class="tile-title">Mintwave Studio</h3>
-              <p class="tile-meta"><span class="chip">web design</span><span class="chip">motion</span><span class="chip">ui system</span></p>
-            </div>
-          </article>
-          <article class="tile">
-            <div class="tile-body">
-              <h3 class="tile-title">Velour Cosmetics</h3>
-              <p class="tile-meta"><span class="chip">packaging</span><span class="chip">product</span><span class="chip">ads</span></p>
-            </div>
-          </article>
-          <article class="tile">
-            <div class="tile-body">
-              <h3 class="tile-title">Arc House</h3>
-              <p class="tile-meta"><span class="chip">identity</span><span class="chip">editorial</span><span class="chip">print</span></p>
-            </div>
-          </article>
-          <article class="tile">
-            <div class="tile-body">
-              <h3 class="tile-title">Sable Coffee</h3>
-              <p class="tile-meta"><span class="chip">logo</span><span class="chip">menu</span><span class="chip">signage</span></p>
-            </div>
-          </article>
-          <article class="tile">
-            <div class="tile-body">
-              <h3 class="tile-title">Lumen Tech</h3>
-              <p class="tile-meta"><span class="chip">3D</span><span class="chip">product</span><span class="chip">landing</span></p>
-            </div>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <section class="section" id="process">
-      <div class="container">
-        <div class="kicker">How we work</div>
-        <h2 class="section-title">Fast, clean, collaborative — no drama.</h2>
-        <p class="section-desc">
-          A simple process that keeps quality high and timelines tight.
-        </p>
-
-        <div class="process">
-          <div class="step">
-            <div class="n">1</div>
-            <h4>Discovery</h4>
-            <p>Goals, audience, competitors, and a clear “what good looks like” checklist.</p>
-          </div>
-          <div class="step">
-            <div class="n">2</div>
-            <h4>Direction</h4>
-            <p>Moodboards + design routes. We pick a lane before we polish.</p>
-          </div>
-          <div class="step">
-            <div class="n">3</div>
-            <h4>Design</h4>
-            <p>Systems first, then assets. Typography, spacing, and consistency are king.</p>
-          </div>
-          <div class="step">
-            <div class="n">4</div>
-            <h4>Delivery</h4>
-            <p>Export packages, web-ready assets, and handoff docs so your team can move fast.</p>
-          </div>
-        </div>
-
-        <div class="quote" role="note" aria-label="testimonial">
-          <p>“The scroll-driven 3D hero is exactly the kind of detail that makes a brand feel premium — gfsagcy nailed the vibe.”</p>
-          <small>— Demo client testimonial (placeholder)</small>
-        </div>
-      </div>
-    </section>
-
-    <footer class="footer" id="contact">
-      <div class="container">
-        <div class="footer-grid">
-          <div class="card" style="box-shadow:none;background:rgba(255,255,255,.04)">
-            <h3 style="font-family:var(--ff2);margin:0 0 10px;font-size:18px">Start a project</h3>
-            <p style="color:var(--muted);margin:0 0 16px;line-height:1.7">
-              Tell us what you’re building. We’ll reply with a quick plan + quote.
-            </p>
-            <div class="hero-actions" style="margin-top:0">
-              <button class="btn btn-primary" type="button" id="btnEmail">Email us</button>
-              <button class="btn" type="button" id="btnCopy">Copy email</button>
-            </div>
-            <p style="margin-top:12px;color:rgba(255,255,255,.55);font-size:12px">Email: <span id="agencyEmail" style="color:rgba(255,255,255,.82)">hello@gfsagcy.studio</span></p>
-          </div>
-
-          <div>
-            <h4>Pages</h4>
-            <p><a href="#services">Services</a></p>
-            <p><a href="#work">Work</a></p>
-            <p><a href="#process">Process</a></p>
-            <p><a href="#top">Back to top</a></p>
-          </div>
-
-          <div>
-            <h4>What’s in the demo</h4>
-            <p>Three.js 3D scene</p>
-            <p>Scroll-based animation mapping</p>
-            <p>Inline SVG logo</p>
-            <p>No build tools (1 HTML)</p>
-          </div>
-        </div>
-
-        <div class="fineprint">
-          <span>© 2026 gfsagcy. Demo build in one file.</span>
-          <span id="scrollReadout">scroll: 0%</span>
-        </div>
+        <nav class="social" aria-label="Social links">
+        <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 7.2A4.8 4.8 0 1 0 16.8 12 4.8 4.8 0 0 0 12 7.2Zm0 7.95A3.15 3.15 0 1 1 15.15 12 3.15 3.15 0 0 1 12 15.15ZM16.8 5.7a1.05 1.05 0 1 1-1.05 1.05A1.05 1.05 0 0 1 16.8 5.7Zm3.15 1.2A4.8 4.8 0 0 0 18 4.05 7.8 7.8 0 0 0 12 3.6a7.8 7.8 0 0 0-6 .45A4.8 4.8 0 0 0 4.05 6a7.8 7.8 0 0 0-.45 6A4.8 4.8 0 0 0 6 19.95a7.65 7.65 0 0 0 6 .45 4.8 4.8 0 0 0 4.95-3.45 7.65 7.65 0 0 0 .45-6Z"/></svg>
+          Instagram
+        </a>
+        <a href="https://www.facebook.com/people/Pixel-Nest-agcy/61560573432887/" target="_blank" rel="noopener noreferrer">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 22v-8.25h2.75l.5-3.25H13.5V8.5c0-.9.25-1.5 1.55-1.5H16.5V4.1A22.91 22.91 0 0 0 14.25 4c-2.35 0-4 1.45-4 4.1V10.5H7.5v3.25H10.25V22h3.25Z"/></svg>
+          Facebook
+        </a>
+        <a href="https://www.linkedin.com/in/pixel-nest-agcy-861254407/" target="_blank" rel="noopener noreferrer">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 8.25a1.75 1.75 0 1 1-1.75-1.75 1.75 1.75 0 0 1 1.75 1.75ZM4.75 10.75h3.5V20h-3.5v-9.25ZM11.25 14.5c0-1.15.35-2.35 1.65-2.35 1.4 0 1.6 1.3 1.6 2.3V20h3.5v-5.65c0-2.8-1.5-4.1-3.5-4.1a3.8 3.8 0 0 0-3.25 1.8v-1.5h-3.5V20h3.5v-5.5Z"/></svg>
+          LinkedIn
+        </a>
+        </nav>
       </div>
     </footer>
-  </main>
-
+  </div>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.170.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.170.0/examples/jsm/"
+    }
+  }
+  </script>
   <script type="module">
-    const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false;
+    import * as THREE from "three";
+    import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
 
-    const errBox = document.getElementById('threeError');
-    function showThreeError(title, details) {
-      if (!errBox) return;
-      errBox.style.display = 'block';
-      errBox.innerHTML = `
-        <div class="row">
-          <div>
-            <b>${title}</b>
-            <div class="mini">3D disabled (site still works).</div>
-          </div>
-          <button class="btn" type="button" id="btnRetry3d">Retry 3D</button>
-        </div>
-        <div class="msg">
-          ${details}
-          <div style="margin-top:8px">
-            Open with a local server (not file://). Example:
-            <code>python3 -m http.server 5500</code>
-          </div>
-        </div>
-      `;
-      document.getElementById('btnRetry3d')?.addEventListener('click', () => location.reload());
-    }
-
-    async function loadTHREE() {
-      const sources = [
-        'https://unpkg.com/three@0.165.0/build/three.module.js',
-        'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js',
-        'https://esm.sh/three@0.165.0'
-      ];
-      let lastErr = null;
-      for (const url of sources) {
-        try {
-          const mod = await import(url);
-          if (mod?.MathUtils && mod?.WebGLRenderer) return mod;
-        } catch (e) {
-          lastErr = e;
-        }
-      }
-      throw lastErr ?? new Error('Failed to load Three.js from all sources.');
-    }
-
-    let THREE;
-    try {
-      THREE = await loadTHREE();
-    } catch (e) {
-      // If Three.js cannot load (offline / blocked), keep page usable.
-      const stage = document.getElementById('stage');
-      if (stage) stage.style.display = 'none';
-      showThreeError(
-        'Three.js did not load',
-        `Your browser couldn’t import Three.js from a CDN. This usually means no internet, CDN blocked, or opening via <code>file://</code>.<br><br><code>${String(e?.message ?? e)}</code>`
-      );
-      throw e;
-    }
-
-    const stage = document.getElementById('stage');
-    const scrollReadout = document.getElementById('scrollReadout');
-
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
-    renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+    const wrap = document.getElementById("canvas-wrap");
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
-    stage.appendChild(renderer.domElement);
+    renderer.setClearColor(0x000000, 0);
+    wrap.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x07080b, 0.08);
+    const camera = new THREE.PerspectiveCamera(48, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.set(0, 0.4, 6);
 
-    const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 80);
-    camera.position.set(0, 0.4, 6.5);
+    const teal = 0x47c1b9;
+    const purple = 0x7c3aed;
 
-    const clock = new THREE.Clock();
-
-    // Lights
-    const key = new THREE.DirectionalLight(0x7c5cff, 1.2);
-    key.position.set(2.6, 2.2, 2.4);
+    scene.add(new THREE.AmbientLight(0x223344, 0.35));
+    const key = new THREE.SpotLight(teal, 120);
+    key.position.set(4, 6, 6);
+    key.angle = 0.45;
+    key.penumbra = 0.55;
+    key.decay = 2;
+    key.distance = 40;
     scene.add(key);
 
-    const fill = new THREE.DirectionalLight(0x27f7d0, 0.9);
-    fill.position.set(-3.1, 1.0, 1.8);
-    scene.add(fill);
-
-    const rim = new THREE.PointLight(0xff4ecd, 1.4, 20, 2);
-    rim.position.set(0.0, -0.8, -3.0);
+    const rim = new THREE.PointLight(purple, 35, 20, 2);
+    rim.position.set(-3, 1, 2);
     scene.add(rim);
 
-    const ambient = new THREE.AmbientLight(0xffffff, 0.14);
-    scene.add(ambient);
+    const group = new THREE.Group();
+    scene.add(group);
 
-    // Group containing hero objects (we’ll animate with scroll)
-    const rig = new THREE.Group();
-    scene.add(rig);
+    // Clean, professional hero background (no rocks/balls)
+    const bgCanvas = document.createElement("canvas");
+    bgCanvas.width = 1024;
+    bgCanvas.height = 1024;
+    const bctx = bgCanvas.getContext("2d");
+    bctx.fillStyle = "#030506";
+    bctx.fillRect(0, 0, 1024, 1024);
+    const g1 = bctx.createRadialGradient(520, 520, 20, 520, 520, 620);
+    g1.addColorStop(0, "rgba(71,193,185,0.35)");
+    g1.addColorStop(0.55, "rgba(71,193,185,0.12)");
+    g1.addColorStop(1, "rgba(3,5,6,0)");
+    bctx.fillStyle = g1;
+    bctx.fillRect(0, 0, 1024, 1024);
+    const g2 = bctx.createRadialGradient(320, 360, 20, 320, 360, 520);
+    g2.addColorStop(0, "rgba(124,58,237,0.22)");
+    g2.addColorStop(1, "rgba(3,5,6,0)");
+    bctx.fillStyle = g2;
+    bctx.fillRect(0, 0, 1024, 1024);
+    const bgTex = new THREE.CanvasTexture(bgCanvas);
+    bgTex.colorSpace = THREE.SRGBColorSpace;
+    const bg = new THREE.Mesh(
+      new THREE.PlaneGeometry(14, 9),
+      new THREE.MeshBasicMaterial({ map: bgTex, transparent: true, opacity: 0.95, depthWrite: false })
+    );
+    bg.position.set(0, 0.6, -5);
+    scene.add(bg);
 
-    // Main object: torus knot
-    const knotGeo = new THREE.TorusKnotGeometry(1.05, 0.32, 220, 32);
-    const knotMat = new THREE.MeshStandardMaterial({
-      color: 0xffffff,
-      metalness: 0.55,
-      roughness: 0.12,
-      emissive: new THREE.Color(0x120a28),
-      emissiveIntensity: 0.65
-    });
-    const knot = new THREE.Mesh(knotGeo, knotMat);
-    knot.position.set(0.2, 0.0, 0.0);
-    rig.add(knot);
+    const uiGroup = new THREE.Group();
+    uiGroup.position.set(-0.35, 0.85, -0.9);
+    group.add(uiGroup);
 
-    // Orbiting logo-like rings
-    const ringMat = new THREE.MeshStandardMaterial({
-      color: 0x27f7d0,
-      metalness: 0.4,
-      roughness: 0.25,
-      emissive: new THREE.Color(0x072a25),
-      emissiveIntensity: 0.85
-    });
-    const rings = new THREE.Group();
-    rig.add(rings);
-    for (let i = 0; i < 3; i++) {
-      const g = new THREE.TorusGeometry(1.85 + i * 0.25, 0.045 + i * 0.012, 16, 160);
-      const m = ringMat.clone();
-      m.color = new THREE.Color(i === 0 ? 0x27f7d0 : i === 1 ? 0x7c5cff : 0xff4ecd);
-      m.emissive = new THREE.Color(i === 0 ? 0x052a25 : i === 1 ? 0x0b052a : 0x2a0519);
-      const r = new THREE.Mesh(g, m);
-      r.rotation.set(i * 0.55, i * 0.25, i * 0.85);
-      rings.add(r);
-    }
-
-    // Floating panels (subtle)
-    const panelGeo = new THREE.PlaneGeometry(1.8, 1.2, 1, 1);
-    const mkPanel = (color, x, y, z) => {
+    function uiCard(w, h, colorHex, pos, rotY) {
+      const geo = new RoundedBoxGeometry(w, h, 0.03, 6, 0.06);
       const mat = new THREE.MeshStandardMaterial({
-        color,
-        transparent: true,
-        opacity: 0.22,
-        roughness: 0.18,
-        metalness: 0.25,
-        side: THREE.DoubleSide,
-        emissive: new THREE.Color(color).multiplyScalar(0.15),
-        emissiveIntensity: 0.7
+        color: 0x05080b,
+        metalness: 0.15,
+        roughness: 0.55,
+        emissive: new THREE.Color(colorHex),
+        emissiveIntensity: 0.22,
       });
-      const mesh = new THREE.Mesh(panelGeo, mat);
-      mesh.position.set(x, y, z);
-      mesh.rotation.set(0.12, x > 0 ? -0.6 : 0.55, 0.0);
-      return mesh;
-    };
-    const p1 = mkPanel(0x7c5cff,  2.7,  0.8, -1.6);
-    const p2 = mkPanel(0x27f7d0, -2.8, -0.2, -2.0);
-    const p3 = mkPanel(0xff4ecd,  1.6, -1.0, -2.8);
-    rig.add(p1, p2, p3);
-
-    // Particle field
-    const ptsCount = 1500;
-    const pos = new Float32Array(ptsCount * 3);
-    const col = new Float32Array(ptsCount * 3);
-    const rnd = (a,b)=> a + Math.random()*(b-a);
-    const cA = new THREE.Color(0x7c5cff);
-    const cB = new THREE.Color(0x27f7d0);
-    const cC = new THREE.Color(0xff4ecd);
-    for (let i = 0; i < ptsCount; i++) {
-      const i3 = i * 3;
-      pos[i3 + 0] = rnd(-10, 10);
-      pos[i3 + 1] = rnd(-6, 6);
-      pos[i3 + 2] = rnd(-12, 6);
-      const t = Math.random();
-      const cc = t < 0.5 ? cA.clone().lerp(cB, t * 2) : cB.clone().lerp(cC, (t - 0.5) * 2);
-      col[i3 + 0] = cc.r;
-      col[i3 + 1] = cc.g;
-      col[i3 + 2] = cc.b;
+      const m = new THREE.Mesh(geo, mat);
+      m.position.copy(pos);
+      m.rotation.set(0, rotY, 0);
+      return m;
     }
-    const ptsGeo = new THREE.BufferGeometry();
-    ptsGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-    ptsGeo.setAttribute('color', new THREE.BufferAttribute(col, 3));
-    const ptsMat = new THREE.PointsMaterial({
+
+    const cards = [
+      uiCard(1.45, 0.52, teal, new THREE.Vector3(0.0, 0.18, 0.0), -0.18),
+      uiCard(1.15, 0.42, purple, new THREE.Vector3(0.25, -0.35, 0.12), 0.22),
+      uiCard(0.9, 0.34, teal, new THREE.Vector3(-0.35, -0.12, 0.22), -0.28),
+    ];
+    cards.forEach((c) => uiGroup.add(c));
+
+    // Improved laptop model (rounded edges, bezel, keyboard + trackpad)
+    const laptop = new THREE.Group();
+
+    const chassisMat = new THREE.MeshStandardMaterial({
+      color: 0x0f1217,
+      metalness: 0.75,
+      roughness: 0.28,
+      envMapIntensity: 1.0,
+    });
+    const darkMat = new THREE.MeshStandardMaterial({
+      color: 0x07090c,
+      metalness: 0.15,
+      roughness: 0.65,
+    });
+
+    // Base (rounded)
+    const baseGeo = new RoundedBoxGeometry(2.35, 0.12, 1.55, 6, 0.06);
+    const base = new THREE.Mesh(baseGeo, chassisMat);
+    base.position.y = -0.06;
+    laptop.add(base);
+
+    // Deck inset (keyboard area)
+    const deckGeo = new RoundedBoxGeometry(2.22, 0.03, 1.44, 6, 0.04);
+    const deck = new THREE.Mesh(deckGeo, darkMat);
+    deck.position.set(0, 0.01, 0);
+    laptop.add(deck);
+
+    // Trackpad
+    const trackGeo = new RoundedBoxGeometry(0.72, 0.012, 0.52, 6, 0.03);
+    const track = new THREE.Mesh(trackGeo, new THREE.MeshStandardMaterial({ color: 0x0c0f14, metalness: 0.25, roughness: 0.55 }));
+    track.position.set(0, 0.025, 0.36);
+    laptop.add(track);
+
+    // Keyboard texture (simple procedural)
+    const kbCanvas = document.createElement("canvas");
+    kbCanvas.width = 1024;
+    kbCanvas.height = 512;
+    const kctx = kbCanvas.getContext("2d");
+    kctx.fillStyle = "#06080b";
+    kctx.fillRect(0, 0, kbCanvas.width, kbCanvas.height);
+    kctx.fillStyle = "rgba(248,250,251,0.08)";
+    const cols = 14, rows = 5;
+    const padX = 80, padY = 90, gapX = 18, gapY = 18;
+    const keyW = (kbCanvas.width - padX * 2 - gapX * (cols - 1)) / cols;
+    const keyH = (kbCanvas.height - padY * 2 - gapY * (rows - 1)) / rows;
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const x = padX + c * (keyW + gapX);
+        const y = padY + r * (keyH + gapY);
+        const w = keyW * (r === rows - 1 && (c === 0 || c === cols - 1) ? 1.5 : 1);
+        kctx.fillRect(x, y, w, keyH);
+      }
+    }
+    kctx.fillStyle = "rgba(71,193,185,0.06)";
+    kctx.fillRect(padX, padY - 36, kbCanvas.width - padX * 2, 10);
+    const kbTex = new THREE.CanvasTexture(kbCanvas);
+    kbTex.colorSpace = THREE.SRGBColorSpace;
+    kbTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    const kbMat = new THREE.MeshStandardMaterial({ map: kbTex, metalness: 0.05, roughness: 0.85 });
+    const kbPlane = new THREE.Mesh(new THREE.PlaneGeometry(1.85, 0.78), kbMat);
+    kbPlane.rotation.x = -Math.PI / 2;
+    kbPlane.position.set(0, 0.026, -0.18);
+    laptop.add(kbPlane);
+
+    // Lid (rounded) + bezel
+    const lidGeo = new RoundedBoxGeometry(2.35, 0.08, 1.55, 6, 0.06);
+    const lid = new THREE.Mesh(lidGeo, chassisMat);
+    lid.position.set(0, 0.78, -0.78);
+    lid.rotation.x = -Math.PI * 0.42;
+    laptop.add(lid);
+
+    const bezelGeo = new RoundedBoxGeometry(2.12, 0.03, 1.32, 6, 0.04);
+    const bezel = new THREE.Mesh(bezelGeo, darkMat);
+    bezel.position.set(0, 0.78, -0.735);
+    bezel.rotation.x = -Math.PI * 0.42;
+    bezel.position.y += 0.012;
+    laptop.add(bezel);
+
+    // Screen (slightly inset)
+    const screenGeo = new THREE.PlaneGeometry(1.95, 1.18);
+    const screenMat = new THREE.MeshBasicMaterial({ color: purple, transparent: true, opacity: 0.92 });
+    const screen = new THREE.Mesh(screenGeo, screenMat);
+    screen.position.set(0, 0.78, -0.715);
+    screen.rotation.x = -Math.PI * 0.42;
+    screen.position.y += 0.02;
+    laptop.add(screen);
+
+    laptop.rotation.set(-0.15, 0.45, 0);
+    laptop.position.set(0.15, 0.35, 0);
+    group.add(laptop);
+
+    const particlesGeo = new THREE.BufferGeometry();
+    const pCount = 900;
+    const positions = new Float32Array(pCount * 3);
+    for (let i = 0; i < pCount; i++) {
+      positions[i * 3] = (Math.random() - 0.5) * 24;
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 14;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 10 - 3;
+    }
+    particlesGeo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    const particlesMat = new THREE.PointsMaterial({
+      color: teal,
       size: 0.03,
-      vertexColors: true,
       transparent: true,
-      opacity: 0.85,
-      depthWrite: false
+      opacity: 0.35,
+      depthWrite: false,
     });
-    const pts = new THREE.Points(ptsGeo, ptsMat);
-    scene.add(pts);
+    const particles = new THREE.Points(particlesGeo, particlesMat);
+    scene.add(particles);
 
-    // Simple 3D "section labels" (canvas textures, no external assets)
-    function makeTextTexture(text, {
-      w = 1024,
-      h = 256,
-      fg = 'rgba(255,255,255,.92)',
-      sub = 'rgba(255,255,255,.55)',
-      glow = 'rgba(124,92,255,.55)',
-      font = '600 86px "Space Grotesk", Inter, system-ui, sans-serif',
-      font2 = '500 28px Inter, system-ui, sans-serif',
-      subtitle = ''
-    } = {}) {
-      const c = document.createElement('canvas');
-      c.width = w; c.height = h;
-      const ctx = c.getContext('2d');
-      if (!ctx) return null;
-
-      ctx.clearRect(0, 0, w, h);
-      // glow band
-      const g = ctx.createLinearGradient(0, 0, w, 0);
-      g.addColorStop(0, 'rgba(39,247,208,.15)');
-      g.addColorStop(0.5, glow);
-      g.addColorStop(1, 'rgba(255,78,205,.18)');
-      ctx.fillStyle = g;
-      ctx.globalAlpha = 0.9;
-      ctx.fillRect(0, h * 0.62, w, 10);
-      ctx.globalAlpha = 1;
-
-      ctx.font = font;
-      ctx.fillStyle = fg;
-      ctx.textBaseline = 'alphabetic';
-      ctx.fillText(text, 56, 120);
-
-      if (subtitle) {
-        ctx.font = font2;
-        ctx.fillStyle = sub;
-        ctx.fillText(subtitle, 58, 178);
-      }
-
-      const tex = new THREE.CanvasTexture(c);
-      tex.colorSpace = THREE.SRGBColorSpace;
-      tex.anisotropy = 8;
-      return tex;
-    }
-
-    function makeLabelPlane(text, subtitle, colorHex) {
-      const tex = makeTextTexture(text, { subtitle, glow: `rgba(${(colorHex>>16)&255},${(colorHex>>8)&255},${colorHex&255},.6)` });
-      const mat = new THREE.MeshBasicMaterial({
-        map: tex,
-        transparent: true,
-        opacity: 0.0,
-        depthWrite: false
-      });
-      const geo = new THREE.PlaneGeometry(3.8, 0.95, 1, 1);
-      const mesh = new THREE.Mesh(geo, mat);
-      return mesh;
-    }
-
-    const labels = new THREE.Group();
-    scene.add(labels);
-    const lblHero = makeLabelPlane('GFSAGCY', 'graphic design agency', 0x7c5cff);
-    const lblServices = makeLabelPlane('SERVICES', 'branding • web • 3D • motion', 0x27f7d0);
-    const lblWork = makeLabelPlane('SELECTED WORK', 'campaigns • visuals • systems', 0xff4ecd);
-    const lblProcess = makeLabelPlane('PROCESS', 'fast • clean • collaborative', 0x7c5cff);
-    labels.add(lblHero, lblServices, lblWork, lblProcess);
-
-    // Position labels along a Z "runway"
-    lblHero.position.set(-0.2, 1.25, 1.0);
-    lblServices.position.set(-0.2, 0.9, -3.0);
-    lblWork.position.set(-0.2, 0.7, -7.0);
-    lblProcess.position.set(-0.2, 0.6, -10.8);
-    labels.children.forEach((m, i) => {
-      m.rotation.y = 0.08 + i * 0.02;
-    });
-    const labelBaseY = labels.children.map((m) => m.position.y);
-
-    // Scroll mapping
-    const state = {
-      scroll01: 0,
-      target01: 0,
-      t: 0
-    };
-
-    const clamp01 = (v) => Math.max(0, Math.min(1, v));
-    const ease = (t) => (t <= 0) ? 0 : (t >= 1) ? 1 : (t * t * (3 - 2 * t)); // smoothstep
-
-    function updateScrollTarget() {
-      const max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
-      state.target01 = clamp01(window.scrollY / max);
-      scrollReadout.textContent = `scroll: ${Math.round(state.target01 * 100)}%`;
-    }
-
-    window.addEventListener('scroll', updateScrollTarget, { passive: true });
-    updateScrollTarget();
-
-    // Simple smooth-damp
-    function damp(current, target, lambda, dt) {
-      return THREE.MathUtils.damp(current, target, lambda, dt);
-    }
-
-    // CTA buttons
-    const EMAIL = 'hello@gfsagcy.studio';
-    document.getElementById('btnCopy')?.addEventListener('click', async () => {
-      try {
-        await navigator.clipboard.writeText(EMAIL);
-        const btn = document.getElementById('btnCopy');
-        if (btn) {
-          const old = btn.textContent;
-          btn.textContent = 'Copied';
-          btn.style.borderColor = 'rgba(143,255,143,.35)';
-          btn.style.background = 'rgba(143,255,143,.08)';
-          setTimeout(() => { btn.textContent = old; btn.removeAttribute('style'); }, 900);
-        }
-      } catch {
-        window.location.href = `mailto:${EMAIL}`;
-      }
+    let mouseX = 0;
+    let mouseY = 0;
+    window.addEventListener("pointermove", (e) => {
+      mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+      mouseY = (e.clientY / window.innerHeight) * 2 - 1;
     });
 
-    document.getElementById('btnEmail')?.addEventListener('click', () => {
-      window.location.href = `mailto:${EMAIL}?subject=${encodeURIComponent('Project inquiry — gfsagcy')}`;
-    });
-
-    document.getElementById('btnStart')?.addEventListener('click', () => {
-      document.getElementById('contact')?.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth' });
-    });
-
-    document.getElementById('btnScrollDemo')?.addEventListener('click', () => {
-      document.getElementById('services')?.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth' });
-    });
-
-    // Resize
-    window.addEventListener('resize', () => {
-      renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
-      renderer.setSize(window.innerWidth, window.innerHeight);
+    window.addEventListener("resize", () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
-    // Render loop
-    function tick() {
-      const dt = Math.min(0.05, clock.getDelta());
-      const elapsed = clock.elapsedTime;
-      state.t += dt;
+    const clock = new THREE.Clock();
+    function animate() {
+      requestAnimationFrame(animate);
+      const t = clock.getElapsedTime();
 
-      // Smooth scroll if not reduced motion; otherwise snap
-      state.scroll01 = prefersReducedMotion ? state.target01 : damp(state.scroll01, state.target01, 10, dt);
+      group.rotation.y = Math.sin(t * 0.15) * 0.08 + mouseX * 0.12;
+      group.rotation.x = Math.cos(t * 0.12) * 0.05 + mouseY * 0.06;
+      group.position.y = Math.sin(t * 0.9) * 0.08;
 
-      const s = state.scroll01;
-
-      // Keyframed "scroll journey" (camera flies through stations)
-      const stops = [
-        { t: 0.00, cam: new THREE.Vector3(0.10, 0.55, 7.1), look: new THREE.Vector3(0, 0.1, 0), rig: new THREE.Vector3(0, 0.0, 0.0) },
-        { t: 0.28, cam: new THREE.Vector3(0.80, 0.25, 6.2), look: new THREE.Vector3(0, 0.0, -0.8), rig: new THREE.Vector3(0, -0.05, -1.2) },
-        { t: 0.55, cam: new THREE.Vector3(-0.55, 0.18, 5.2), look: new THREE.Vector3(0, 0.0, -3.8), rig: new THREE.Vector3(0.0, -0.10, -3.4) },
-        { t: 0.78, cam: new THREE.Vector3(0.25, 0.05, 4.8), look: new THREE.Vector3(0, -0.05, -7.8), rig: new THREE.Vector3(0.05, -0.16, -6.8) },
-        { t: 1.00, cam: new THREE.Vector3(0.10, -0.08, 4.5), look: new THREE.Vector3(0, -0.10, -10.8), rig: new THREE.Vector3(0.0, -0.22, -9.2) }
-      ];
-
-      let a = stops[0], b = stops[stops.length - 1];
-      for (let i = 0; i < stops.length - 1; i++) {
-        if (s >= stops[i].t && s <= stops[i + 1].t) { a = stops[i]; b = stops[i + 1]; break; }
-      }
-      const span = Math.max(1e-6, b.t - a.t);
-      const u = ease((s - a.t) / span);
-
-      const camPos = a.cam.clone().lerp(b.cam, u);
-      const lookAt = a.look.clone().lerp(b.look, u);
-      const rigPos = a.rig.clone().lerp(b.rig, u);
-
-      // Add a little breathing motion (keeps it alive even when stopped)
-      camPos.x += Math.sin(elapsed * 0.35) * 0.05;
-      camPos.y += Math.sin(elapsed * 0.28 + 1.2) * 0.03;
-      lookAt.y += Math.sin(elapsed * 0.25) * 0.02;
-
-      camera.position.copy(camPos);
-      camera.lookAt(lookAt);
-      rig.position.copy(rigPos);
-
-      // Rig motion
-      rig.rotation.y = elapsed * 0.28 + s * Math.PI * 1.35;
-      rig.rotation.x = Math.sin(elapsed * 0.23) * 0.15 + s * 0.22;
-
-      knot.rotation.x += dt * (0.35 + s * 0.65);
-      knot.rotation.z += dt * (0.25 + s * 0.55);
-
-      rings.children.forEach((r, i) => {
-        r.rotation.x += dt * (0.12 + i * 0.08);
-        r.rotation.y -= dt * (0.18 + i * 0.06);
-        r.rotation.z += dt * (0.10 + i * 0.07);
+      uiGroup.rotation.y = Math.sin(t * 0.35) * 0.08 + mouseX * 0.12;
+      uiGroup.rotation.x = Math.cos(t * 0.25) * 0.05 + mouseY * 0.06;
+      cards.forEach((c, i) => {
+        c.position.y += Math.sin(t * 0.9 + i) * 0.0009;
       });
 
-      // Panels drift
-      p1.position.y = 0.85 + Math.sin(elapsed * 0.7) * 0.12;
-      p2.position.y = -0.20 + Math.sin(elapsed * 0.6 + 2) * 0.12;
-      p3.position.y = -1.05 + Math.sin(elapsed * 0.8 + 4) * 0.12;
+      laptop.position.y = 0.35 + Math.sin(t * 1.1) * 0.06;
+      laptop.rotation.z = Math.sin(t * 0.7) * 0.03;
 
-      // Particle field reacts to scroll (subtle)
-      pts.rotation.y = elapsed * 0.03 + s * 0.35;
-      pts.rotation.x = elapsed * 0.02 + s * 0.15;
+      const pulse = 0.85 + 0.15 * Math.sin(t * 2.5);
+      screenMat.color.setHSL(0.75, 0.65, 0.45 * pulse);
 
-      // Labels fade in/out based on camera proximity
-      labels.children.forEach((m, idx) => {
-        const dz = Math.abs(camera.position.z - m.position.z);
-        const near = 1 - clamp01((dz - 1.6) / 4.0);
-        const bob = Math.sin(elapsed * 0.7 + m.position.z) * 0.02;
-        m.position.y = labelBaseY[idx] + bob;
-        if (m.material) {
-          m.material.opacity = prefersReducedMotion ? Math.min(0.85, near) : damp(m.material.opacity, Math.min(0.90, near), 10, dt);
-        }
-      });
-
-      // Lighting color shift with scroll
-      const keyC = new THREE.Color(0x7c5cff).lerp(new THREE.Color(0xff4ecd), s);
-      const fillC = new THREE.Color(0x27f7d0).lerp(new THREE.Color(0x7c5cff), s * 0.8);
-      key.color.copy(keyC);
-      fill.color.copy(fillC);
-      rim.intensity = 1.0 + s * 0.9;
-
-      // Scene fade with scroll so readability increases lower on page
-      scene.fog.density = 0.075 + s * 0.035;
+      particles.rotation.y = t * 0.02;
+      key.intensity = 100 + Math.sin(t * 1.8) * 25;
 
       renderer.render(scene, camera);
-      requestAnimationFrame(tick);
     }
-    tick();
+    animate();
   </script>
 </body>
 </html>
